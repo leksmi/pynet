@@ -18,7 +18,9 @@ connection_params = {
 
 def get_device_config(ip_mgmt: str) -> str:
     """
-    Retrieving  config from device
+    Логин на устройство, чтение конфигурации,
+    запись конфигурации в текущий каталог.
+    (класс CiscoConfParse считывает конфиг именно из файла на диске!)
     :param ip_mgmt: str with ip_mgmt
     :return config: str with configuration
     """
@@ -28,7 +30,18 @@ def get_device_config(ip_mgmt: str) -> str:
     return result_obj.result
 
 
-configs = {}
+def config_generator(parser_obj: CiscoConfParse.find_objects) -> list:
+    """
+    It get object from CiscoConfParse parser,
+    then generates commands list
+    :param parser_obj: CiscoConfParse.find_objects element
+    :return:
+    """
+    commands_block = [parser_obj.parent.text]
+    for child in parser_obj.children:
+        commands_block.append(child.text)
+    return commands_block
+
 
 for device in DEVICES:
     try:
@@ -37,6 +50,3 @@ for device in DEVICES:
     except ScrapliAuthenticationFailed as err:
         print(f'\nCould not connect to {device} with error: {err} !')
         continue
-
-for dev in configs:
-    print('\n' * 3, configs[dev])
